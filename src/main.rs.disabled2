@@ -1,0 +1,93 @@
+use windows::Win32::Foundation::LRESULT;
+use windows::Win32::{
+    Foundation::{HWND, LPARAM, WPARAM},
+    System::Power::POWERBROADCAST_SETTING,
+};
+
+use log::LevelFilter;
+use log4rs::append::console::ConsoleAppender;
+use log4rs::append::file::FileAppender;
+use log4rs::encode::pattern::PatternEncoder;
+use log4rs::config::{Appender, Config, Logger, Root};
+use std::{thread::sleep, time::Duration};
+use windows::Win32::UI::WindowsAndMessaging::DefWindowProcA;
+
+use log::debug;
+
+#[cfg(windows)]
+unsafe extern "system" fn wndproc(
+    window: HWND,
+    message: u32,
+    wparam: WPARAM,
+    lparam: LPARAM,
+) -> LRESULT {
+
+    match message {
+        PBT_APMQUERYSUSPEND => {
+            debug!("PBT_APMQUERYSUSPEND");
+            LRESULT(0)
+        }
+        WM_POWERBROADCAST => {
+            debug!("WM_POWERBROADCAST: {:?} - {:?}", wparam, lparam);
+            if wparam == WPARAM(32787) {
+                let st: &mut POWERBROADCAST_SETTING =
+                    &mut *(lparam.0 as *mut POWERBROADCAST_SETTING);
+
+                debug!("Power Setting: {:?}", st.PowerSetting);
+                // let guid = GUID::from(MONITOR_GUID);
+                // if st.PowerSetting == guid && st.Data == [0] {
+                // thread::spawn(|| send_mixed_input);
+                // let _ = registry_ops::RegistrySetting::new(
+                //     &registry_ops::RegistryEntries::LastRobotInput,
+                // )
+                // .set_registry_data(&registry_ops::get_current_time());
+                // }
+            }
+            LRESULT(0)
+        }
+        _ => {
+            debug!("{} - {:?} - {:?}", message, wparam, lparam);
+            DefWindowProcA(window, message, wparam, lparam)
+        }
+    }
+}
+
+
+
+#[cfg(windows)]
+fn main() -> () {
+    // Wait forever
+    let stdout = ConsoleAppender::builder().build();
+
+    let requests = FileAppender::builder()
+        .encoder(Box::new(PatternEncoder::new("{d} - {m}{n}")))
+        .build("log/requests.log")
+        .unwrap();
+
+    let config = Config::builder()
+        .appender(Appender::builder().build("stdout", Box::new(stdout)))
+        .appender(Appender::builder().build("requests", Box::new(requests)))
+        .logger(Logger::builder().build("app::backend::db", LevelFilter::Debug))
+        .logger(Logger::builder()
+            .appender("requests")
+            .additive(false)
+            .build("app::requests", LevelFilter::Info))
+        .build(Root::builder().appender("stdout").build(LevelFilter::Trace))
+        .unwrap();
+
+    let handle = log4rs::init_config(config).unwrap();
+
+
+    loop {
+        sleep(Duration::from_secs(1000));
+        debug!("Hello, Windows!");
+    }
+
+    // use windows::Win32::UI::WindowsAndMessaging::{MessageBoxA, MB_OK};
+    // let _ = unsafe { MessageBoxA(
+    //     None,
+    //     "Hello, Windows!",
+    //     "Hello, Windows!",
+    //     MB_OK,
+    // ) };
+}
