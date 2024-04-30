@@ -1,9 +1,11 @@
 use std::ffi::OsString;
 
+use log::{info, debug};
+use log4rs::Handle;
 use windows_service::{
     service::{ServiceAccess, ServiceErrorControl, ServiceInfo, ServiceStartType, ServiceType},
-    service_manager::{ServiceManager, ServiceManagerAccess},
     service_control_handler::{self, ServiceControlHandlerResult},
+    service_manager::{ServiceManager, ServiceManagerAccess},
 };
 
 use std::time::Duration;
@@ -35,7 +37,7 @@ pub(crate) async fn rule_applier(
         // output = monitor_new_processes(&rule_set, &wmi_con) => output,
         // Or wait for shutdown signal
         _ = shutdown_recv.recv() => {
-            println!("Shutting down process monitor");
+            info!("Shutting down process monitor");
             Ok(())
         }
     }
@@ -43,15 +45,36 @@ pub(crate) async fn rule_applier(
 
 #[cfg(windows)]
 fn service_main(_: Vec<OsString>) {
-    use windows_service::service::{ServiceControl, ServiceControlAccept, ServiceExitCode, ServiceState, ServiceStatus};
-
-
+    use windows_service::service::{
+        ServiceControl, ServiceControlAccept, ServiceExitCode, ServiceState, ServiceStatus,
+        SessionChangeReason,
+    };
 
     let rt = Runtime::new().unwrap();
     let (shutdown_send, mut shutdown_recv) = mpsc::unbounded_channel();
 
     let event_handler = move |control_event| -> ServiceControlHandlerResult {
         match control_event {
+            ServiceControl::SessionChange(session) => {
+                info!(
+                    "Session Changed: {}",
+                    match session.reason {
+                        SessionChangeReason::ConsoleConnect => "Console Connect",
+                        SessionChangeReason::ConsoleDisconnect => "Console Disconnect",
+                        SessionChangeReason::RemoteConnect => "Remote Connect",
+                        SessionChangeReason::RemoteDisconnect => "Remote Disconnect",
+                        SessionChangeReason::SessionLogon => "Session Logon",
+                        SessionChangeReason::SessionLogoff => "Session Logoff",
+                        SessionChangeReason::SessionLock => "Session Lock",
+                        SessionChangeReason::SessionUnlock => "Session Unlock",
+                        SessionChangeReason::SessionRemoteControl => "Session Remote Control",
+                        SessionChangeReason::SessionCreate => "Session Create",
+                        SessionChangeReason::SessionTerminate => "Session Terminate",
+                    }
+                );
+
+                ServiceControlHandlerResult::NoError
+            }
             ServiceControl::Interrogate => ServiceControlHandlerResult::NoError,
             ServiceControl::Stop => {
                 shutdown_send.send(()).unwrap();
@@ -66,7 +89,7 @@ fn service_main(_: Vec<OsString>) {
         .set_service_status(ServiceStatus {
             service_type: ServiceType::OWN_PROCESS,
             current_state: ServiceState::Running,
-            controls_accepted: ServiceControlAccept::STOP,
+            controls_accepted: ServiceControlAccept::STOP | ServiceControlAccept::SESSION_CHANGE,
             exit_code: ServiceExitCode::Win32(0),
             checkpoint: 0,
             wait_hint: Duration::default(),
@@ -99,32 +122,45 @@ fn service_main(_: Vec<OsString>) {
         .unwrap();
 }
 
-#[cfg(windows)]
-fn main() -> anyhow::Result<(), windows_service::Error> {
-    use log::{debug, info, LevelFilter};
-    use log4rs::{append::{console::ConsoleAppender, file::FileAppender}, config::{Appender, Logger, Root}, encode::pattern::PatternEncoder, Config};
+fn init_logger() -> Handle {
+    use log::LevelFilter;
+    use log4rs::{
+        append::{console::ConsoleAppender, file::FileAppender},
+        config::{Appender, Root},
+        encode::pattern::PatternEncoder,
+        Config,
+    };
 
-    let stdout = ConsoleAppender::builder().build();
+    let stdout_appender = ConsoleAppender::builder().build();
 
-    let log_file_path = std::env::current_exe().unwrap().with_file_name("service.log");
+    let log_file_path = std::env::current_exe()
+        .unwrap()
+        .with_file_name("service.log");
 
-    let requests = FileAppender::builder()
-        .encoder(Box::new(PatternEncoder::default()))
+    let log_file_appender = FileAppender::builder()
+        .encoder(Box::new(PatternEncoder::new(
+            "{date} {level} {target} - {message}{n}",
+        )))
         .build(log_file_path)
         .unwrap();
 
     let config = Config::builder()
-        .appender(Appender::builder().build("stdout", Box::new(stdout)))
-        .appender(Appender::builder().build("requests", Box::new(requests)))
-        .logger(Logger::builder().build("app::backend::db", LevelFilter::Debug))
-        .logger(Logger::builder()
-            .appender("requests")
-            .additive(false)
-            .build("app::requests", LevelFilter::Info))
-        .build(Root::builder().appender("stdout").appender("requests").build(LevelFilter::Trace))
+        .appender(Appender::builder().build("stdout", Box::new(stdout_appender)))
+        .appender(Appender::builder().build("logfile", Box::new(log_file_appender)))
+        .build(
+            Root::builder()
+                .appender("stdout")
+                .appender("logfile")
+                .build(LevelFilter::Trace),
+        )
         .unwrap();
 
-    let handle = log4rs::init_config(config).unwrap();
+    log4rs::init_config(config).unwrap()
+}
+
+#[cfg(windows)]
+fn main() -> anyhow::Result<(), windows_service::Error> {
+    let _ = init_logger();
 
     let args = std::env::args().collect::<Vec<_>>();
     let command = args.get(1);
@@ -153,11 +189,11 @@ fn main() -> anyhow::Result<(), windows_service::Error> {
         }
     }
 
-    println!("Starting service");
+    info!("Starting service");
     match service_dispatcher::start(SERVICE_NAME, ffi_service_main) {
         Ok(_) => {}
         Err(e) => {
-            println!("Error starting service: {:?}", e);
+            info!("Error starting service: {:?}", e);
         }
     }
     Ok(())
@@ -181,8 +217,10 @@ fn install_service(rules_path: Option<&str>) -> windows_service::Result<()> {
         account_name: None, // run as System
         account_password: None,
     };
+
     let service = service_manager.create_service(&service_info, ServiceAccess::CHANGE_CONFIG)?;
     service.set_description(SERVICE_DESCRIPTION)?;
+
     Ok(())
 }
 

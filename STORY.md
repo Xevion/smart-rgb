@@ -30,3 +30,6 @@ Resources:
 So initial studies were pretty confusing as most of the solutions for detecting changes in lock screen or sleep mode used `Wndproc`, which is a callback installed when creating a Window; a solution that I really wasn't interested in.
 
 On top of being complex as hell, it required hiding the window manually using special `SW_HIDE` magic, and it sounded wrong. Also, I don't think services should have windows at all.
+
+- [Detect if desktop is locked](https://stackoverflow.com/questions/768314/detect-if-desktop-is-locked)
+- [How to detect wake up from sleep mode in windows service?](https://stackoverflow.com/questions/47942716/how-to-detect-wake-up-from-sleep-mode-in-windows-service)
