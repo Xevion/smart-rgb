@@ -1,6 +1,6 @@
-use std::{ffi::OsString};
+use std::ffi::OsString;
 
-use log::{info, debug};
+use log::{debug, info};
 use log4rs::Handle;
 use openrgb::OpenRGB;
 use windows_service::{
@@ -23,7 +23,10 @@ const PROFILE_DISABLE_NAME: &str = "Off";
 
 define_windows_service!(ffi_service_main, service_main);
 
-pub async fn try_load_profile(client: &OpenRGB<TcpStream>, profile_name: &str) -> anyhow::Result<()> {
+pub async fn try_load_profile(
+    client: &OpenRGB<TcpStream>,
+    profile_name: &str,
+) -> anyhow::Result<()> {
     let profiles = client.get_profiles().await?;
 
     let profile_available: bool = profiles.iter().any(|profile| profile == profile_name);
@@ -42,9 +45,10 @@ pub(crate) async fn profile_applier(
     profile_recv: &mut UnboundedReceiver<bool>,
     shutdown_recv: &mut UnboundedReceiver<()>,
 ) -> anyhow::Result<()> {
-
     let client = OpenRGB::connect().await?;
-    client.set_name(format!("{} v{}", SERVICE_NAME, env!("CARGO_PKG_VERSION"))).await?;
+    client
+        .set_name(format!("{} v{}", SERVICE_NAME, env!("CARGO_PKG_VERSION")))
+        .await?;
 
     loop {
         tokio::select! {
@@ -67,7 +71,8 @@ pub(crate) async fn profile_applier(
 #[cfg(windows)]
 fn service_main(_: Vec<OsString>) {
     use windows_service::service::{
-        PowerEventParam, ServiceControl, ServiceControlAccept, ServiceExitCode, ServiceState, ServiceStatus, SessionChangeReason
+        PowerEventParam, ServiceControl, ServiceControlAccept, ServiceExitCode, ServiceState,
+        ServiceStatus, SessionChangeReason,
     };
 
     let rt = Runtime::new().unwrap();
@@ -77,8 +82,7 @@ fn service_main(_: Vec<OsString>) {
 
     let event_handler = move |control_event| -> ServiceControlHandlerResult {
         match control_event {
-            ServiceControl::PowerEvent(event) => 
-            {
+            ServiceControl::PowerEvent(event) => {
                 debug!("Power event: {:?}", event);
                 match event {
                     PowerEventParam::QuerySuspend => {
@@ -125,16 +129,15 @@ fn service_main(_: Vec<OsString>) {
         .set_service_status(ServiceStatus {
             service_type: ServiceType::OWN_PROCESS,
             current_state: ServiceState::Running,
-            controls_accepted: ServiceControlAccept::STOP | ServiceControlAccept::SESSION_CHANGE | ServiceControlAccept::POWER_EVENT,
+            controls_accepted: ServiceControlAccept::STOP
+                | ServiceControlAccept::SESSION_CHANGE
+                | ServiceControlAccept::POWER_EVENT,
             exit_code: ServiceExitCode::Win32(0),
             checkpoint: 0,
             wait_hint: Duration::default(),
             process_id: None,
         })
         .unwrap();
-
-    let args = std::env::args().collect::<Vec<_>>();
-    let rules_path = args.get(2).map(|s| s.as_str()).unwrap_or("rules.json");
 
     let error_code = if rt
         .block_on(profile_applier(&mut profile_recv, &mut shutdown_recv))
