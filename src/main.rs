@@ -1,7 +1,8 @@
-use std::ffi::OsString;
+use std::{ffi::OsString};
 
 use log::{info, debug};
 use log4rs::Handle;
+use openrgb::OpenRGB;
 use windows_service::{
     service::{ServiceAccess, ServiceErrorControl, ServiceInfo, ServiceStartType, ServiceType},
     service_control_handler::{self, ServiceControlHandlerResult},
@@ -9,36 +10,56 @@ use windows_service::{
 };
 
 use std::time::Duration;
-use tokio::{runtime::Runtime, sync::mpsc};
+use tokio::{net::TcpStream, runtime::Runtime, sync::mpsc};
 
 use tokio::sync::mpsc::UnboundedReceiver;
 use windows_service::{define_windows_service, service_dispatcher};
 
-const SERVICE_NAME: &str = "Easy RGB - Background Scheduler";
-const SERVICE_DESCRIPTION: &str = "Service to apply rules to background processes";
+const SERVICE_NAME: &str = "RGBXevion";
+const SERVICE_DESCRIPTION: &str = "Custom service to toggle RGB lights based on lock/sleep events";
+
+const PROFILE_ENABLE_NAME: &str = "On";
+const PROFILE_DISABLE_NAME: &str = "Off";
 
 define_windows_service!(ffi_service_main, service_main);
 
-pub(crate) async fn rule_applier(
-    rule_file_path: &str,
+pub async fn try_load_profile(client: &OpenRGB<TcpStream>, profile_name: &str) -> anyhow::Result<()> {
+    let profiles = client.get_profiles().await?;
+
+    let profile_available: bool = profiles.iter().any(|profile| profile == profile_name);
+    if !profile_available {
+        info!("Profile not found: {}", profile_name);
+        return Ok(());
+    }
+
+    client.load_profile(profile_name).await?;
+    info!("Profile set to: {}", profile_name);
+
+    Ok(())
+}
+
+pub(crate) async fn profile_applier(
+    profile_recv: &mut UnboundedReceiver<bool>,
     shutdown_recv: &mut UnboundedReceiver<()>,
 ) -> anyhow::Result<()> {
-    // let wmi_con = WMIConnection::new(COMLibrary::new()?)?;
 
-    // Apply rules to all running processes
-    // let running_process: Vec<WinProcess> = wmi_con.async_query().await?;
-    // running_process.into_iter().for_each(|process| {
-    //     let process_info: ProcessInfo = process.into();
-    //     rule_set.apply(&process_info)
-    // });
+    let client = OpenRGB::connect().await?;
+    client.set_name(format!("{} v{}", SERVICE_NAME, env!("CARGO_PKG_VERSION"))).await?;
 
-    tokio::select! {
-        // Apply rules to new processes
-        // output = monitor_new_processes(&rule_set, &wmi_con) => output,
-        // Or wait for shutdown signal
-        _ = shutdown_recv.recv() => {
-            info!("Shutting down process monitor");
-            Ok(())
+    loop {
+        tokio::select! {
+            enable = profile_recv.recv() => {
+                debug!("Received profile command: {:?}", enable);
+                if enable.is_none() {
+                    continue;
+                }
+
+                try_load_profile(&client, if enable.unwrap() { PROFILE_ENABLE_NAME } else { PROFILE_DISABLE_NAME }).await?;
+            }
+            _ = shutdown_recv.recv() => {
+                info!("Service shutting down");
+                return Ok(())
+            }
         }
     }
 }
@@ -46,32 +67,47 @@ pub(crate) async fn rule_applier(
 #[cfg(windows)]
 fn service_main(_: Vec<OsString>) {
     use windows_service::service::{
-        ServiceControl, ServiceControlAccept, ServiceExitCode, ServiceState, ServiceStatus,
-        SessionChangeReason,
+        PowerEventParam, ServiceControl, ServiceControlAccept, ServiceExitCode, ServiceState, ServiceStatus, SessionChangeReason
     };
 
     let rt = Runtime::new().unwrap();
+
     let (shutdown_send, mut shutdown_recv) = mpsc::unbounded_channel();
+    let (profile_send, mut profile_recv) = mpsc::unbounded_channel::<bool>();
 
     let event_handler = move |control_event| -> ServiceControlHandlerResult {
         match control_event {
-            ServiceControl::SessionChange(session) => {
-                info!(
-                    "Session Changed: {}",
-                    match session.reason {
-                        SessionChangeReason::ConsoleConnect => "Console Connect",
-                        SessionChangeReason::ConsoleDisconnect => "Console Disconnect",
-                        SessionChangeReason::RemoteConnect => "Remote Connect",
-                        SessionChangeReason::RemoteDisconnect => "Remote Disconnect",
-                        SessionChangeReason::SessionLogon => "Session Logon",
-                        SessionChangeReason::SessionLogoff => "Session Logoff",
-                        SessionChangeReason::SessionLock => "Session Lock",
-                        SessionChangeReason::SessionUnlock => "Session Unlock",
-                        SessionChangeReason::SessionRemoteControl => "Session Remote Control",
-                        SessionChangeReason::SessionCreate => "Session Create",
-                        SessionChangeReason::SessionTerminate => "Session Terminate",
+            ServiceControl::PowerEvent(event) => 
+            {
+                debug!("Power event: {:?}", event);
+                match event {
+                    PowerEventParam::QuerySuspend => {
+                        // Send false to disable RGB
+                        profile_send.send(false).unwrap();
                     }
-                );
+                    PowerEventParam::ResumeSuspend | PowerEventParam::QuerySuspendFailed => {
+                        // Send true to enable RGB
+                        profile_send.send(true).unwrap();
+                    }
+                    _ => {}
+                }
+
+                ServiceControlHandlerResult::NoError
+            }
+            ServiceControl::SessionChange(change) => {
+                debug!("Session change: {:?}", change);
+
+                match change.reason {
+                    SessionChangeReason::SessionLock => {
+                        // Send false to disable RGB
+                        profile_send.send(false).unwrap();
+                    }
+                    SessionChangeReason::SessionUnlock => {
+                        // Send true to enable RGB
+                        profile_send.send(true).unwrap();
+                    }
+                    _ => {}
+                }
 
                 ServiceControlHandlerResult::NoError
             }
@@ -89,7 +125,7 @@ fn service_main(_: Vec<OsString>) {
         .set_service_status(ServiceStatus {
             service_type: ServiceType::OWN_PROCESS,
             current_state: ServiceState::Running,
-            controls_accepted: ServiceControlAccept::STOP | ServiceControlAccept::SESSION_CHANGE,
+            controls_accepted: ServiceControlAccept::STOP | ServiceControlAccept::SESSION_CHANGE | ServiceControlAccept::POWER_EVENT,
             exit_code: ServiceExitCode::Win32(0),
             checkpoint: 0,
             wait_hint: Duration::default(),
@@ -101,7 +137,7 @@ fn service_main(_: Vec<OsString>) {
     let rules_path = args.get(2).map(|s| s.as_str()).unwrap_or("rules.json");
 
     let error_code = if rt
-        .block_on(rule_applier(rules_path, &mut shutdown_recv))
+        .block_on(profile_applier(&mut profile_recv, &mut shutdown_recv))
         .is_err()
     {
         1
@@ -170,7 +206,7 @@ fn main() -> anyhow::Result<(), windows_service::Error> {
     if let Some(command) = command {
         match command.as_str() {
             "install" => {
-                install_service(args.get(2).map(|s| s.as_str()))?;
+                install_service()?;
                 info!("Service installed");
                 return Ok(());
             }
@@ -200,7 +236,7 @@ fn main() -> anyhow::Result<(), windows_service::Error> {
 }
 
 #[cfg(windows)]
-fn install_service(rules_path: Option<&str>) -> windows_service::Result<()> {
+fn install_service() -> windows_service::Result<()> {
     let manager_access = ServiceManagerAccess::CONNECT | ServiceManagerAccess::CREATE_SERVICE;
     let service_manager = ServiceManager::local_computer(None::<&str>, manager_access)?;
     let service_binary_path = ::std::env::current_exe().unwrap();
