@@ -33,3 +33,19 @@ On top of being complex as hell, it required hiding the window manually using sp
 
 - [Detect if desktop is locked](https://stackoverflow.com/questions/768314/detect-if-desktop-is-locked)
 - [How to detect wake up from sleep mode in windows service?](https://stackoverflow.com/questions/47942716/how-to-detect-wake-up-from-sleep-mode-in-windows-service)
+
+## Zone Size Testing
+
+Once I looked into the actual `openrgb-rs` crate, I realized it was kind of old, and wanted to also see if I could fix another issue I'm having: Zone Sizing.
+
+The zone sizes I save are never remembered, and I have no idea if they're the appropriate sizes. I thought it would be cool to create a little utility to try and size them up and down, testing the LEDs one by one until I was certain of the required size.
+
+Unfortunately, zone resizing doesn't work for me at all, so the project idea was a bust.
+
+I tried connecting with the OpenRGB community, but despite activity in the Discord, no one has responded to me as of now. Yikes.
+
+## Profile Loading
+
+Luckily though, profile loading works fine and it was easy enough to get the channels setup for loading two different profiles.
+
+When I lock, my service quickly sends a TCP message to the OpenRGB server running, loading the **Off** profile. Then, once I unlock, it sends the profile load command for the **On** profile. Yay.
