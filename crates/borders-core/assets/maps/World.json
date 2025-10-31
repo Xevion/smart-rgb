@@ -1,0 +1,76 @@
+{
+  "tiles": [
+    {
+      "color": "#000000",
+      "name": "Water",
+      "colorBase": "water",
+      "colorVariant": 4,
+      "conquerable": false,
+      "navigable": true
+    },
+    {
+      "color": "#222222",
+      "name": "Water",
+      "colorBase": "water",
+      "colorVariant": 6,
+      "conquerable": false,
+      "navigable": true
+    },
+    {
+      "color": "#555555",
+      "name": "Water",
+      "colorBase": "water",
+      "colorVariant": 12,
+      "conquerable": false,
+      "navigable": true
+    },
+    {
+      "color": "#777777",
+      "name": "Water",
+      "colorBase": "water",
+      "colorVariant": 14,
+      "conquerable": false,
+      "navigable": true
+    },
+    {
+      "color": "#999999",
+      "name": "Land",
+      "colorBase": "mountain",
+      "colorVariant": 5,
+      "conquerable": true,
+      "navigable": false,
+      "expansionCost": 80,
+      "expansionTime": 80
+    },
+    {
+      "color": "#BBBBBB",
+      "name": "Land",
+      "colorBase": "mountain",
+      "colorVariant": 9,
+      "conquerable": true,
+      "navigable": false,
+      "expansionCost": 70,
+      "expansionTime": 70
+    },
+    {
+      "color": "#DDDDDD",
+      "name": "Land",
+      "colorBase": "grass",
+      "colorVariant": 9,
+      "conquerable": true,
+      "navigable": false,
+      "expansionCost": 60,
+      "expansionTime": 60
+    },
+    {
+      "color": "#FFFFFF",
+      "name": "Land",
+      "colorBase": "grass",
+      "colorVariant": 6,
+      "conquerable": true,
+      "navigable": false,
+      "expansionCost": 50,
+      "expansionTime": 50
+    }
+  ]
+}

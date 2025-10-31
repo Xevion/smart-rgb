@@ -1,0 +1,132 @@
+{
+  "latest": "0.5.7",
+  "display_mode": "latest_only",
+  "versions": [
+    {
+      "version": "0.5.7",
+      "released": "2025-10-11T16:56:44.403Z",
+      "visible": true,
+      "platforms": {
+        "linux-x86_64": {
+          "files": [
+            {
+              "type": "appimage",
+              "url": "https://cdn.borders.xevion.dev/releases/v0.5.7/linux-x86_64/iron-borders_0.1.0_amd64.AppImage",
+              "filename": "iron-borders_0.1.0_amd64.AppImage",
+              "size": 86313464,
+              "checksums": {
+                "sha256": "40343d73e0dd47e1af8f31c8f4e84689883982374fbeda8d6b2baf25c9402c52",
+                "sha512": "ea9e09c35d39b800ed7d837d0b2bb352298d7cff87bbd9fdc4bffed7fcc3ff6f0293efc183f075442692bb2ebc861bfcc234c18938602bc125681fcbe65dfedf",
+                "md5": "afa799a612aeca1bbbfdcd3226bbcf7f"
+              }
+            },
+            {
+              "type": "deb",
+              "url": "https://cdn.borders.xevion.dev/releases/v0.5.7/linux-x86_64/iron-borders_0.1.0_amd64.deb",
+              "filename": "iron-borders_0.1.0_amd64.deb",
+              "size": 10504424,
+              "checksums": {
+                "sha256": "54fd6568d38b457688b509a3cd4096e735d1a8e4174eeaf5c9103dc926f87777",
+                "sha512": "008bcd687c8dc2f5cbc4c104a25201339c77a3ace1788bf50bc386e2f14a9cf6752d519c4f4b5b8c8cddbe65cb12ca1bded688f14297b977c786f10d455a31fe",
+                "md5": "cd0128c310616b1ddf906128608ccd0c"
+              }
+            },
+            {
+              "type": "rpm",
+              "url": "https://cdn.borders.xevion.dev/releases/v0.5.7/linux-x86_64/iron-borders-0.1.0-1.x86_64.rpm",
+              "filename": "iron-borders-0.1.0-1.x86_64.rpm",
+              "size": 10504162,
+              "checksums": {
+                "sha256": "ff244308de628f2af6b56363516c7aca4b69adb67dc678a5c3bdcfdb16635120",
+                "sha512": "8aecae09425c98f210c41ddcc3a89c85d4b97dc9065412ba2d7b105cf04e1f3e1cb3f6a8491f9c2fa2539acac4fdec8bc35cddfd6010597e7f928c7b692b503b",
+                "md5": "be75cfa33ba9ecb44421864e72ea9967"
+              }
+            }
+          ]
+        },
+        "macos-x86_64": {
+          "files": [
+            {
+              "type": "dmg",
+              "url": "https://cdn.borders.xevion.dev/releases/v0.5.7/macos-x86_64/iron-borders_0.1.0_x64.dmg",
+              "filename": "iron-borders_0.1.0_x64.dmg",
+              "size": 9602672,
+              "checksums": {
+                "sha256": "01f1fb16ae253cdd27234b02e9885a83d02fe1798226cb2d659ac68702824c20",
+                "sha512": "a704bf2e084eb89768a169005d3fa53ccada1089b676e01cd8525e84b3dff269cc442f7c1d62010850b6e5105648eba532217b3aa60644717baac07266e80ea0",
+                "md5": "d7a950210a22e88995dbb64618377151"
+              }
+            }
+          ]
+        },
+        "macos-aarch64": {
+          "files": [
+            {
+              "type": "dmg",
+              "url": "https://cdn.borders.xevion.dev/releases/v0.5.7/macos-aarch64/iron-borders_0.1.0_aarch64.dmg",
+              "filename": "iron-borders_0.1.0_aarch64.dmg",
+              "size": 9060820,
+              "checksums": {
+                "sha256": "43e63e7194e895350603faa6c6272b4cf1ddf0ea4c94769ef0584815ad9f88e5",
+                "sha512": "b6b9e3c2d871bffdea1de6506ae1b3e5bd5a1b6559f59dc29fda289c7bfc74231fd72f0e8b97f0529e6c08fcbc12f9fe808216ba56c86fb3a48323cd6972817b",
+                "md5": "c4524a748b7064eb6b1cb1973cf69f27"
+              }
+            }
+          ]
+        },
+        "windows-x86_64": {
+          "files": [
+            {
+              "type": "exe",
+              "url": "https://cdn.borders.xevion.dev/releases/v0.5.7/windows-x86_64/iron-borders_0.1.0_x64-setup.exe",
+              "filename": "iron-borders_0.1.0_x64-setup.exe",
+              "size": 6371644,
+              "checksums": {
+                "sha256": "3f6f22a7efe09603338631d2fe66ed3ad6b8d1a1120651fcfb14463e429ae1f3",
+                "sha512": "a6bee3f0f1ca07b27ac63bce56adaf6953299051bb74f09e7d2a44dbb6a2ee5fe064739fc0efd46e117f584b7a5a13b2e99d8ba8219ccba3dd255c5f5926c6e8",
+                "md5": "977b59994347542a475847ddef9c1622"
+              }
+            },
+            {
+              "type": "msi",
+              "url": "https://cdn.borders.xevion.dev/releases/v0.5.7/windows-x86_64/iron-borders_0.1.0_x64_en-US.msi",
+              "filename": "iron-borders_0.1.0_x64_en-US.msi",
+              "size": 9154560,
+              "checksums": {
+                "sha256": "4df0b207825e9ac5a60d8e3e2cd608aa76e665c9b550e9e0167f16a90d8441ba",
+                "sha512": "54e6b396e65bae859c396362f8c5f3c6cc8b18d6d338d29241565995871e8db6a1ed76268a8dc5f330077b1ae8986c5d872098bf1758de29d997d0070f130458",
+                "md5": "01cb21e9cab2b76918c47db7b7685024"
+              }
+            }
+          ]
+        },
+        "windows-aarch64": {
+          "files": [
+            {
+              "type": "exe",
+              "url": "https://cdn.borders.xevion.dev/releases/v0.5.7/windows-aarch64/iron-borders_0.1.0_arm64-setup.exe",
+              "filename": "iron-borders_0.1.0_arm64-setup.exe",
+              "size": 5664249,
+              "checksums": {
+                "sha256": "4cab4d2568717c50c7fd6f397eba95db45259c09215ebff23bf4a99ceec175d0",
+                "sha512": "1bc6c53233c9934aeb87f911f53ed0e0090f9e3164abde7e72e6f119489420ffec48509d07ea29b147d29e791ea507cfc7422f1d6025ca054b21a7f26b4b9105",
+                "md5": "0878dd2c37501774a494d25d57c890a3"
+              }
+            },
+            {
+              "type": "msi",
+              "url": "https://cdn.borders.xevion.dev/releases/v0.5.7/windows-aarch64/iron-borders_0.1.0_arm64_en-US.msi",
+              "filename": "iron-borders_0.1.0_arm64_en-US.msi",
+              "size": 8593408,
+              "checksums": {
+                "sha256": "2ef849bd77082afff7ea3d624c37ccc6ffa3ab53326f630c66323db7769af775",
+                "sha512": "54de9b1805a75d9134e7ce0b1697f86cadc88a2986168ae99b74ee4a365949991b2ee05f4072859c278646b0972c6d13d889164b3c99ea5b28f05dec9f308d02",
+                "md5": "d40f963278fb6488bfe4e264448438e5"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

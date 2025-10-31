@@ -1,0 +1,53 @@
+{
+    "name": "iron-borders",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "check": "tsc --noEmit --project tsconfig.browser.json",
+        "dev": "vike dev",
+        "dev:browser": "vike dev --mode browser",
+        "build": "tsc --project tsconfig.browser.json && vike build",
+        "build:desktop": "tsc --project tsconfig.desktop.json && vike build --mode desktop",
+        "build:browser": "tsc --project tsconfig.browser.json && vike build --mode browser",
+        "preview": "vike preview",
+        "preview:browser": "vike preview --mode browser",
+        "tauri": "tauri"
+    },
+    "dependencies": {
+        "@fontsource-variable/inter": "^5.2.8",
+        "@fontsource-variable/oswald": "^5.2.8",
+        "@radix-ui/react-dialog": "^1.1.15",
+        "@tailwindcss/vite": "^4.1.16",
+        "@tauri-apps/api": "^2.9.0",
+        "@tauri-apps/plugin-opener": "^2.5.2",
+        "@tauri-apps/plugin-process": "^2.3.1",
+        "clsx": "^2.1.1",
+        "lucide-react": "^0.548.0",
+        "motion": "^12.23.24",
+        "overlayscrollbars": "^2.12.0",
+        "overlayscrollbars-react": "^0.5.6",
+        "pixi.js": "^8.14.0",
+        "react": "^19.2.0",
+        "react-dom": "^19.2.0",
+        "tailwind-merge": "^3.3.1",
+        "tailwindcss": "^4.1.16",
+        "ts-pattern": "^5.9.0",
+        "vike": "^0.4.244",
+        "vike-react": "^0.6.10"
+    },
+    "devDependencies": {
+        "@tauri-apps/cli": "^2.9.1",
+        "@types/react": "^19.2.2",
+        "@types/react-dom": "^19.2.2",
+        "@vitejs/plugin-react": "^5.1.0",
+        "lightningcss": "^1.30.2",
+        "prettier": "^3.6.2",
+        "typescript": "~5.9.3",
+        "vite": "^7.1.12",
+        "vite-imagetools": "^9.0.0"
+    },
+    "browserslist": [
+        "last 2 versions and >0.2% and not dead",
+        "Firefox ESR"
+    ]
+}

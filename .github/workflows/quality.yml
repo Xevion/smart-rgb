@@ -1,0 +1,84 @@
+name: Quality
+on:
+  - push
+env:
+  CARGO_TERM_COLOR: always
+  RUST_VERSION: "stable"
+jobs:
+  rust-quality:
+    name: Rust Quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ env.RUST_VERSION }}
+          targets: x86_64-unknown-linux-gnu, wasm32-unknown-unknown
+      - uses: Swatinem/rust-cache@v2
+      - name: Cache apt packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            /var/cache/apt/archives/*.deb
+          key: ubuntu-latest-apt-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ubuntu-latest-apt-
+      - name: Install Linux dependencies
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y --no-install-recommends \
+            build-essential \
+            libglib2.0-dev \
+            libwebkit2gtk-4.1-dev \
+            libayatana-appindicator3-dev \
+            librsvg2-dev \
+            patchelf
+      - name: Install just
+        uses: taiki-e/install-action@just
+      - name: Install cargo-machete
+        uses: taiki-e/install-action@cargo-machete
+      - name: Run Rust checks
+        run: just --shell bash --shell-arg -c check
+      - name: Install cargo-audit
+        uses: taiki-e/install-action@cargo-audit
+      - name: Run security audit
+        run: cargo audit
+  frontend-quality:
+    name: Frontend Quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ env.RUST_VERSION }}
+          targets: x86_64-unknown-linux-gnu, wasm32-unknown-unknown
+      - uses: Swatinem/rust-cache@v2
+      - name: Install wasm-bindgen-cli
+        uses: taiki-e/install-action@v2
+        with:
+          tool: wasm-bindgen-cli@0.2.104
+      - name: Install frontend dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: frontend
+      - name: Install just
+        uses: taiki-e/install-action@just
+      - name: Build WASM for frontend checks
+        run: |
+          cargo build -p borders-wasm --profile wasm-dev --target wasm32-unknown-unknown
+          wasm-bindgen --out-dir pkg --out-name borders --target web target/wasm32-unknown-unknown/wasm-dev/borders_wasm.wasm
+          mkdir -p frontend/pkg
+          cp -r pkg/* frontend/pkg/
+      - name: Run frontend TypeScript checks
+        run: pnpm run build:browser
+        working-directory: frontend

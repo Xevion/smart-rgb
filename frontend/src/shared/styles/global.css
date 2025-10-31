@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+@theme {
+    --font-oswald: "Oswald Variable", sans-serif;
+    --font-inter: "Inter Variable", Inter, Avenir, Helvetica, Arial, sans-serif;
+
+    --color-parchment: rgb(241 235 219);
+}
+
+:root {
+    font-family: "Inter Variable", Inter, Avenir, Helvetica, Arial, sans-serif;
+    color: #1e293b;
+    background-color: transparent;
+
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+html,
+body,
+#root {
+    @apply fixed top-0 left-0;
+}

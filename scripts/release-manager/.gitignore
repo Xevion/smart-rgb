@@ -1,0 +1,16 @@
+# Dependencies
+node_modules/
+pnpm-lock.yaml
+
+# Environment variables
+.env
+
+# Build output
+dist/
+
+# Downloaded releases (should be in repo root)
+releases/
+
+# Temporary files
+*.tmp.json
+.manifest.tmp.json

@@ -1,0 +1,17 @@
+[package]
+name = "borders-server"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+
+[dependencies]
+anyhow = "1.0"
+borders-core = { path = "../borders-core" }
+flume = "0.11"
+rkyv = { version = "0.8", features = ["hashbrown-0_15"] }
+rustls-pemfile = "2.2.0"
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "sync", "time"] }
+tracing = "0.1"
+tracing-log = "0.2"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+web-transport = "0.9"

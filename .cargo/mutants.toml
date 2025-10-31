@@ -1,0 +1,17 @@
+# Copy VCS directories (.git, etc.) to build directories
+copy_vcs = true
+
+# Examine only files matching these glob patterns
+# examine_globs = ["src/**/*.rs", "examples/**/*.rs"]
+
+# Exclude files matching these glob patterns
+# exclude_globs = ["src/test_*.rs", "src/**/test.rs", "tests/**/*.rs"]
+
+# Use built-in defaults for skip_calls (includes "with_capacity")
+skip_calls_defaults = true
+
+# Run tests from these specific packages for all mutants
+test_package = ["borders-core"]
+
+# Cargo profile to use for builds
+profile = "mutant"

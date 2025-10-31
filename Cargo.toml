@@ -1,0 +1,97 @@
+[workspace]
+members = [
+    "crates/borders-core",
+    "crates/borders-desktop",
+    "crates/borders-wasm",
+    "crates/borders-server",
+]
+resolver = "2"
+
+[workspace.package]
+authors = ["Xevion"]
+edition = "2024"
+version = "0.6.1"
+
+
+# Enable a small amount of optimization in the dev profile.
+[profile.dev]
+opt-level = 1
+codegen-units = 256
+
+# Enable a large amount of optimization in the dev profile for dependencies.
+[profile.dev.package."*"]
+opt-level = 3
+
+[profile.dev.package.borders-desktop]
+opt-level = 1
+
+[profile.dev.package.borders-wasm]
+opt-level = 1
+
+[profile.dev.package.borders-server]
+opt-level = 1
+
+[profile.dev.package.borders-core]
+opt-level = 1
+
+# Optimized profile for mutant testing - prioritizes compile speed over runtime performance
+[profile.mutant]
+inherits = "dev"
+opt-level = 1
+debug = 0           # No debug info for faster builds
+codegen-units = 256 # Maximum parallelism
+incremental = false # Faster for many clean builds (mutant testing)
+
+# Keep dependency optimizations from dev profile
+[profile.mutant.package."*"]
+opt-level = 3
+
+[profile.mutant.package.borders-desktop]
+opt-level = 1
+
+[profile.mutant.package.borders-wasm]
+opt-level = 1
+
+[profile.mutant.package.borders-server]
+opt-level = 1
+
+[profile.mutant.package.borders-core]
+opt-level = 1
+
+# Enable more optimization in the release profile at the cost of compile time.
+[profile.release]
+# Compile the entire crate as one unit.
+# Slows compile times, marginal improvements.
+codegen-units = 1
+# Do a second optimization pass over the entire program, including dependencies.
+# Slows compile times, marginal improvements.
+lto = "thin"
+
+
+# Development profile for WASM builds (faster compile times)
+[profile.wasm-dev]
+inherits = "dev"
+opt-level = 1
+panic = "abort"
+
+# Size optimization profile for WASM builds
+[profile.wasm-release]
+inherits = "release"
+incremental = false
+debug = false
+opt-level = "s"      # Optimize for size
+lto = true           # Link-time optimization
+codegen-units = 1    # Single codegen unit for better optimization
+panic = "abort"      # Smaller panic implementation
+strip = true         # Remove debug symbols
+
+# Performance profiling profile for WASM builds (fast with debug symbols)
+[profile.wasm-debug]
+inherits = "release"
+incremental = false
+debug = true         # Preserve debug symbols for profiling
+opt-level = 3        # Full optimization for performance
+lto = "thin"         # Link-time optimization without aggressive stripping
+codegen-units = 1    # Single codegen unit for better optimization
+panic = "abort"      # Smaller panic implementation
+strip = "none"       # Keep all debug symbols

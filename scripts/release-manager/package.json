@@ -1,0 +1,26 @@
+{
+  "name": "release-manager",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "cli": "tsx cli.ts"
+  },
+  "dependencies": {
+    "@actions/artifact": "^2.2.4",
+    "@aws-sdk/client-s3": "^3.908.0",
+    "@aws-sdk/lib-storage": "^3.908.0",
+    "@octokit/rest": "^21.0.2",
+    "adm-zip": "^0.5.16",
+    "commander": "^13.0.0",
+    "dotenv": "^16.4.7",
+    "glob": "^11.0.0",
+    "ora": "^8.1.1",
+    "picocolors": "^1.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.8",
+    "tsx": "^4.19.2",
+    "typescript": "^5.9.3"
+  }
+}

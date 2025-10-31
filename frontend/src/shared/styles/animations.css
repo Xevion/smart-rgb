@@ -1,0 +1,111 @@
+.fade-blur-in[data-state="open"] {
+    animation: fadeBlurIn 300ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.fade-blur-in[data-state="closed"] {
+    animation: fadeBlurOut 300ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fadeBlurIn {
+    from {
+        opacity: 0;
+        backdrop-filter: blur(0px);
+    }
+    to {
+        opacity: 1;
+        backdrop-filter: blur(8px);
+    }
+}
+
+@keyframes fadeBlurOut {
+    from {
+        opacity: 1;
+        backdrop-filter: blur(8px);
+    }
+    to {
+        opacity: 0;
+        backdrop-filter: blur(0px);
+    }
+}
+
+.fade-in[data-state="open"] {
+    animation: fadeIn 300ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.fade-in[data-state="closed"] {
+    animation: fadeOut 300ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+}
+
+@keyframes shimmer {
+    0%,
+    100% {
+        color: #ffffff;
+        text-shadow:
+            0 2px 4px rgba(0, 0, 0, 0.1),
+            0 0 10px rgba(30, 41, 59, 0.2);
+    }
+    50% {
+        color: #ececec;
+        text-shadow:
+            0 2px 4px rgba(0, 0, 0, 0.1),
+            0 0 15px rgba(51, 65, 85, 0.3);
+    }
+}
